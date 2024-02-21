@@ -117,3 +117,42 @@ function selectWinner(){ //if the one of following winning combination match the
 replayBtn.onclick = ()=>{
     window.location.reload(); //reload the current page on replay button click
 }
+function animateLike(button) {
+    // Add animation class to the like button
+    button.classList.add('like-animation');
+    // Remove animation class after animation completes
+    setTimeout(() => {
+        button.classList.remove('like-animation');
+    }, 500); // Duration of animation in milliseconds
+}
+
+document.querySelectorAll(".post").forEach(post => {
+    const postId = post.dataset.postId;
+    const ratings = post.querySelectorAll(".post-rating");
+    const likeRating = ratings[0];
+
+    ratings.forEach(rating => {
+        const button = rating.querySelector(".post-rating-button");
+        const count = rating.querySelector(".post-rating-count");
+
+        button.addEventListener("click", async () => {
+            const isLiked = rating.classList.contains("post-rating-selected");
+
+            if (isLiked) {
+                // If already liked, remove like
+                count.textContent = Math.max(0, Number(count.textContent) - 1);
+                rating.classList.remove("post-rating-selected");
+
+                // Send request to remove like from the server
+                await fetch(`/posts/${postId}/unlike`, { method: "DELETE" });
+            } else {
+                // If not liked, add like
+                count.textContent = Number(count.textContent) + 1;
+                rating.classList.add("post-rating-selected");
+
+                // Send request to add like to the server
+                await fetch(`/posts/${postId}/like`, { method: "POST" });
+            }
+        });
+    });
+});
